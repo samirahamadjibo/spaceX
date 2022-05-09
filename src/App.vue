@@ -1,23 +1,22 @@
 <template>
   <main>
-    <Launches/>
+    <Launches />
   </main>
 </template>
 
 <script>
-import Launches from './components/Launches.vue'
+import Launches from "./components/Launches.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    Launches
-  }
-}
+    Launches,
+  },
+};
 </script>
 
 <style>
-@import './assets/base.css';
-@import './assets/style.css';
+@import "./assets/style.css";
 
 /* #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
