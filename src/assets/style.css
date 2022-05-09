@@ -1,77 +1,118 @@
-h1 {
-    font-weight: 500;
-    font-size: 2.2rem;
-  }
-  
-  h3 {
-      font-weight: 500;
-      font-size: 1.2rem;
-      margin-bottom: 8px;
-  }
-  
-  .fw-bold{
-      font-weight: 500;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;400&display=swap');
 
-  span, p{
-      font-weight: 300;
-  }
-
-.d-flex{
-    display: flex;
+/* base */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    position: relative;
+    font-weight: normal;
 }
 
-.card{
-    padding: 30px 30px;
+body {
+    color: black;
+    background: white;
+    transition: color 0.5s, background-color 0.5s;
+    line-height: 1.6;
+    font-family: 'Oswald', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+        Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    font-size: 15px;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+select {
+    padding: 10px 20px;
     border-radius: 20px;
 }
 
-header{
+a {
+    color: #447916
+}
+
+/* text */
+h1 {
+    font-weight: 500;
+    font-size: 2.2rem;
+    padding-bottom: 1.5rem;
+}
+
+h3 {
+    font-weight: 500;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.fw-bold {
+    font-weight: 500;
+}
+
+span,
+p {
+    font-weight: 300;
+}
+
+/* sections */
+header {
     background-color: black;
     color: white;
     padding-top: 20px;
     padding-bottom: 100px;
-    padding-left: 50px; 
+    padding-left: 50px;
 }
 
-.next-launch-card{
+.launches-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding-bottom: 50px;
+    margin: 0 50px
+}
+
+.select-wrapper {
+    margin: 20px 50px
+}
+
+/* cards */
+.card {
+    padding: 30px 30px;
+    border-radius: 20px;
+}
+
+.next-launch-card {
     background-color: #DAFCDF;
     color: black;
     width: 500px;
     margin-top: 50px;
 }
 
-.launch-card{
+.launch-card {
+    box-shadow: 0px 0px 15px 5px rgba(181, 181, 181, 0.51);
     background-color: white;
     width: fit-content;
     display: flex;
     flex-direction: column;
     border: 1px gray solid;
-    margin: 30px 50px;
-    width: 500px;
-    height: 800px;
+    margin: 30px 20px;
+    width: 350px;
+    border: none;
 }
 
-.color-dark-green{
+/* colors */
+.color-dark-green {
     color: #447916
 }
 
-.pb-4{
+/* utility */
+.pb-2 {
     padding-bottom: 1.5rem;
 }
-.center{
+
+.center {
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px 20px;
-}
-
-.launches-wrapper{
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    padding-top: 50px;
-    padding-bottom: 50px;
-    justify-content: center;
-    align-items: center;
 }

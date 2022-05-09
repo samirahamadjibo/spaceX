@@ -1,181 +1,358 @@
 <template>
-     <header>
-        <img alt="SpaceX logo" class="logo" src="../assets/spacex-logo.png" width="300" />
-        <h1>Welcome to spaceX launchings program ! </h1>
+  <div>
+    <header>
+      <img
+        alt="SpaceX logo"
+        class="logo"
+        src="../assets/spacex-logo.png"
+        width="300"
+      />
+      <h1>Welcome to spaceX launchings program !</h1>
 
-        <div class="next-launch-card card">
-            <h3>Next launch on <span class="color-dark-green fw-bold">{{ formatDate(nextLaunch.date_local) }}</span></h3>
-            <div class="">
-                <span class="fw-bold">name: </span>
-                <span>{{nextLaunch.name}} </span>
-            </div>
-            <div class="">
-                <span class="fw-bold">time remainging:  </span>
-                <span>{{timeToLaunch()}}{{dateToLaunch.Days}} days, {{dateToLaunch.Minutes}} minutes and {{dateToLaunch.Seconds}} seconds.</span>
-            </div>
+      <div class="next-launch-card card">
+        <h3>
+          Next launch on
+          <span class="color-dark-green fw-bold">{{
+            formatDate(nextLaunch.date_local)
+          }}</span>
+        </h3>
+        <div class="">
+          <span class="fw-bold">name: </span>
+          <span>{{ nextLaunch.name }} </span>
         </div>
-    
+        <div class="">
+          <span class="fw-bold">time remainging: </span>
+          <span
+            >{{ timeToLaunch() }}{{ dateToLaunch.Days }} days,
+            {{ dateToLaunch.Hours }} hours, {{ dateToLaunch.Minutes }} minutes
+            and {{ dateToLaunch.Seconds }} seconds.</span
+          >
+        </div>
+      </div>
     </header>
-      <!-- <LazyYoutube
-        ref="youtubeLazyVideo"
-        src="https://www.youtube.com/watch?v=sX1Y2JMK6g8"
-        max-width="720px"
-        aspect-ratio="16:9"
-        thumbnail-quality="standard"
-    /> -->
+
+    <div class="select-wrapper">
+      <h1>Filter launches</h1>
+      <div>
+        <select @change="switchSelect($event)">
+          <option v-for="option in fetchTypes" v-bind:value="option">
+            {{ option }}
+          </option>
+        </select>
+      </div>
+    </div>
 
     <div class="launches-wrapper">
-        <div v-for="launch in pastLaunches" class="card launch-card">
-            <h3>{{launch.name}}</h3>
-            <p class="pb-4">{{formatDate(launch.date_local)}}</p>
+      <div v-for="launch in pastLaunches" class="card launch-card">
+        <h3>{{ launch.name }}</h3>
+        <p class="pb-2">{{ formatDate(launch.date_local) }}</p>
 
-             <div>
-                <span class="fw-bold">Description: </span>
-                <span>{{launch.description}}</span>
-            </div>
-
-            <p>{{launch.details}}</p>
-            <div class="center">
-                <img v-bind:src="launch.links.patch.small" style="width: 150px" alt="patch of the launch">
-            </div>
-            
-            <div>
-                <span class="fw-bold">Link to article: </span>
-                <span>{{launch.links.article}}</span>
-            </div>
-            <div>
-                <span class="fw-bold">Watch the webcast video: </span>
-                <button type="button" class="btn" @click="showPopUp" >here</button>
-            </div>
-             <PopUp v-show="isPopUpVisible" @close="closePopUp"/>
-             <!-- <div>
-                <span class="fw-bold">Launching site: </span>
-                <span>{{getLaunchpad(launch.launchpad)}}</span> 
-            </div> -->
-             <div>
-                <span class="fw-bold">Launching playload: </span>
-                <ul v-for="payload in launch.payloads">
-                    <li>{{payload}}</li>
-                </ul>
-            </div>
+        <div>
+          <span class="fw-bold">Description: </span>
+          <span>{{ launch.description }}</span>
         </div>
+
+        <p>{{ launch.details }}</p>
+        <div class="center">
+          <img
+            v-bind:src="launch.links.patch.small"
+            style="width: 150px"
+            alt="patch of the launch"
+          />
+        </div>
+
+        <div class="pb-2">
+          <span class="fw-bold">Link to article: </span>
+          <a v-bind:href="launch.links.article">{{ launch.links.article }}</a>
+        </div>
+        <div class="pb-2">
+          <span class="fw-bold">Link to youtube webcast: </span>
+          <a v-bind:href="launch.links.webcast">{{ launch.links.webcast }}</a>
+          <button
+            type="button"
+            class="btn"
+            @click="showPopUp(launch.links.youtube_id)"
+          >
+            Open popup
+          </button>
+        </div>
+        <div class="pb-2">
+          <span class="fw-bold">Launchpad name: </span>
+          <span>{{ launch.launchPadName }}</span>
+        </div>
+
+        <div class="pb-2">
+          <span class="fw-bold">Payload names: </span>
+          <span>
+            <ul v-for="payloadName in launch.payloadNames">
+              <li>{{ payloadName }}</li>
+            </ul>
+          </span>
+        </div>
+
+        <div class="pb-2">
+          <span class="fw-bold">Custommers: </span>
+          <span>
+            <ul v-for="payloadCustomer in launch.payloadCustomers">
+              <ul v-for="customer in payloadCustomer">
+                <li>{{ customer }}</li>
+              </ul>
+            </ul>
+          </span>
+        </div>
+      </div>
     </div>
+  </div>
+  <PopUp
+    v-show="isPopUpVisible"
+    :youtube-id="currentVideoId"
+    @close="closePopUp"
+  />
 </template>
 
 <script>
-import PopUp from './PopUp.vue';
-import LazyYoutube from 'vue-lazytube'
+import PopUp from "./PopUp.vue";
+import axios from "axios";
 
 export default {
-  name: 'Launches',
+  name: "Launches",
   components: {
-      PopUp,
-      LazyYoutube
-    },
+    PopUp,
+  },
   data() {
     return {
       nextLaunch: [],
-      dateToLaunch: { Days:"", Hours: " ", Minutes: " ", Seconds:" "},
-        pastLaunches: [],
-        payloads: [],
-
-        isPopUpVisible: false,
+      pastLaunches: [],
+      dateToLaunch: {
+        Days: " ",
+        Hours: " ",
+        Minutes: " ",
+        Seconds: " ",
+      },
+      fetchTypes: ["All", "Successfull", "Failed"],
+      selectedFetchType: "All",
+      isPopUpVisible: false,
+      currentVideoId: "",
     };
   },
   mounted() {
-    this.fetchNextLaunch(),
-    this.fetchAllLaunches()
-  },
- 
-  computed: {
+    this.fetchNextLaunch();
+    this.fetchAllLaunches();
   },
 
-  methods:{
-    async fetchNextLaunch(){
+  computed: {},
+
+  methods: {
+    async fetchNextLaunch() {
       await fetch("https://api.spacexdata.com/v4/launches/next")
-      .then(response => response.json())
-      .then(data => {
-          this.nextLaunch = data
-      })
-      .catch(error => {
-        alert(error)
-      })
- }, 
-    async fetchAllLaunches(){
-      await fetch("https://api.spacexdata.com/v4/launches")
-      .then(response => response.json())
-      .then(data => {
-          this.pastLaunches = data.slice(0,10)
-      })
-      .catch(error => {
-        alert(error)
-      })
+        .then((response) => response.json())
+        .then((data) => {
+          this.nextLaunch = data;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
-      async fetchSuccessfullLaunches(){
-      await fetch("https://api.spacexdata.com/v4/launches/query")
-      .then(response => response.json())
-      .then(data => {
-          this.pastLaunches = data.slice(0,10)
-      })
-      .catch(error => {
-        alert(error)
-      })
+
+    async fetchAllLaunches() {
+      await axios
+        .post("https://api.spacexdata.com/v4/launches/query", {
+          query: {
+            success: true,
+          },
+          options: {
+            sort: "date_utc",
+            limit: 10,
+          },
+        })
+        .then((data) => {
+          this.pastLaunches = data.data.docs;
+          for (var launch in this.pastLaunches) {
+            launch = this.setLaunchPadName(this.pastLaunches[launch]);
+          }
+          for (var launch in this.pastLaunches) {
+            launch = this.setLaunchPadName(this.pastLaunches[launch]);
+          }
+          for (var launch in this.pastLaunches) {
+            launch = this.setPayloadNames(this.pastLaunches[launch]);
+          }
+          for (var launch in this.pastLaunches) {
+            launch = this.setPayloadCustomers(this.pastLaunches[launch]);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
-  
-    timeToLaunch(){
-        setInterval(function() {
-            var launchDate = new Date(this.nextLaunch.date_local)
-            var now = new Date()
 
-            launchDate = launchDate.getTime()
-            now = now.getTime()
+    async fetchSuccessfullLaunches() {
+      await axios
+        .post("https://api.spacexdata.com/v4/launches/query", {
+          query: {
+            success: true,
+          },
+          options: {
+            sort: "date_utc",
+            limit: 10,
+          },
+        })
+        .then((data) => {
+          this.pastLaunches = data.data.docs;
+          for (var launch in this.pastLaunches) {
+            launch = this.setLaunchPadName(this.pastLaunches[launch]);
+          }
+          for (var launch in this.pastLaunches) {
+            launch = this.setPayloadNames(this.pastLaunches[launch]);
+          }
+          for (var launch in this.pastLaunches) {
+            launch = this.setPayloadCustomers(this.pastLaunches[launch]);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
 
-            const second = 1000,
+    async fetchFailedLaunches() {
+      await axios
+        .post("https://api.spacexdata.com/v4/launches/query", {
+          query: {
+            success: false,
+          },
+          options: {
+            sort: "date_utc",
+            limit: 10,
+          },
+        })
+
+        .then((data) => {
+          this.pastLaunches = data.data.docs;
+          for (var launch in this.pastLaunches) {
+            launch = this.setLaunchPadName(this.pastLaunches[launch]);
+          }
+          for (var launch in this.pastLaunches) {
+            launch = this.setPayloadNames(this.pastLaunches[launch]);
+          }
+          for (var launch in this.pastLaunches) {
+            launch = this.setPayloadCustomers(this.pastLaunches[launch]);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    // methods for getting Launchpad name
+    async setLaunchPadName(launch) {
+      let launchPadName = await this.getLaunchPadName(launch.launchpad);
+      launch["launchPadName"] = launchPadName;
+      return launch;
+    },
+
+    async getLaunchPadName(id) {
+      var response = await axios.get(
+        "https://api.spacexdata.com/v4/launchpads/" + id
+      );
+      return response.data.full_name;
+    },
+
+    // methods for getting Payloads names
+    async setPayloadNames(launch) {
+      launch["payloadNames"] = [];
+      for (var payload in launch.payloads) {
+        let payloadName = await this.getPayloadNames(launch.payloads[payload]);
+        launch["payloadNames"].push(payloadName);
+      }
+      return launch;
+    },
+
+    async getPayloadNames(id) {
+      var response = await axios.get(
+        "https://api.spacexdata.com/v4/payloads/" + id
+      );
+      return response.data.name;
+    },
+
+    // methods for getting Payloads custommer names
+    async setPayloadCustomers(launch) {
+      launch["payloadCustomers"] = [];
+      for (var payload in launch.payloads) {
+        let payloadCustomer = await this.getPayloadCustommers(
+          launch.payloads[payload]
+        );
+        launch["payloadCustomers"].push(payloadCustomer);
+      }
+
+      return launch;
+    },
+
+    async getPayloadCustommers(id) {
+      var response = await axios.get(
+        "https://api.spacexdata.com/v4/payloads/" + id
+      );
+      return response.data.customers;
+    },
+
+    timeToLaunch() {
+      setInterval(
+        function () {
+          var launchDate = new Date(this.nextLaunch.date_local);
+          var now = new Date();
+
+          launchDate = launchDate.getTime();
+          now = now.getTime();
+
+          const second = 1000,
             minute = second * 60,
             hour = minute * 60,
             day = hour * 24;
 
-            var distance = launchDate - now
+          var distance = launchDate - now;
 
-            this.dateToLaunch.Days = Math.floor(distance / (day));
-            this.dateToLaunch.Hours = Math.floor((distance % (day)) / (hour));
-            this.dateToLaunch.Minutes = Math.floor((distance % (hour)) / (minute));
-            this.dateToLaunch.Seconds =  Math.floor((distance % (minute)) / second);
+          if (distance == 0) {
+            this.fetchNextLaunch();
+            this.timeToLaunch();
+          }
 
-        }.bind(this), 100)
+          this.dateToLaunch.Days = Math.floor(distance / day);
+          this.dateToLaunch.Hours = Math.floor((distance % day) / hour);
+          this.dateToLaunch.Minutes = Math.floor((distance % hour) / minute);
+          this.dateToLaunch.Seconds = Math.floor((distance % minute) / second);
+        }.bind(this),
+        100
+      );
     },
 
-    formatDate(date){
-        return new Date(date).toLocaleString()
+    formatDate(date) {
+      return new Date(date).toLocaleString();
     },
-    showPopUp() {
-        this.isPopUpVisible = true;
-      },
-      closePopUp() {
-        this.isPopUpVisible = false;
-      },
-    // getLaunchpad(id){
-    //     var launchpad
-    //     var link = "https://api.spacexdata.com/v4/launchpads/" + id
-    //     console.log(link)
-    //      fetch(link)
-    //   .then(response => response.json())
-    //   .then(data => {
-    //       launchpad = data
-    //   })
-    //   .catch(error => {
-    //     console.log(error)
-    //   })
-    //     return launchpad.name
-    // }
-  }
-}
+
+    switchSelect(event) {
+      this.selectedFetchType = event.target.value;
+      if (this.selectedFetchType == "All") {
+        this.fetchAllLaunches();
+      }
+      if (this.selectedFetchType == "Successfull") {
+        this.fetchSuccessfullLaunches();
+      }
+      if (this.selectedFetchType == "Failed") {
+        this.fetchFailedLaunches();
+      } else {
+        this.fetchAllLaunches();
+      }
+    },
+
+    showPopUp(videoId) {
+      this.currentVideoId = videoId;
+      this.isPopUpVisible = true;
+    },
+    closePopUp() {
+      this.isPopUpVisible = false;
+    },
+  },
+};
 </script>
 
-
-
 <style scoped>
-@import '../assets/base.css';
-@import '../assets/style.css';
+@import "../assets/base.css";
+@import "../assets/style.css";
 </style>
-
